@@ -1,0 +1,54 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  redis:
+    image: redis:latest
+    container_name: redis-dorimonitori
+    ports:
+      - "6999:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data_main:/data
+
+  redis-api-keys:
+    image: redis:latest
+    container_name: redis-dorimonitori-api-keys
+    ports:
+      - "6998:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data_api:/data
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-dorimonitori
+    restart: always
+    ports:
+      - "6997:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  clickhouse_data:
+  redis_data_main:
+  redis_data_api:
+  postgres_data:

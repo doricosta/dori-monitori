@@ -1,6 +1,7 @@
 # 🚀 Dori Monitori
 
 Olá! Bem-vindo ao **Dori Monitori**. Este guia vai te ajudar a colocar tudo para rodar rapidinho, de forma simples e segura.
+Pacote npm: https://www.npmjs.com/package/dori-monitori-sdk
 
 ## 🛠️ Como começar
 

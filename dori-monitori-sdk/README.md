@@ -77,8 +77,8 @@ app.listen(3000)
 ## Logs
 - Ainda não implementados. Serão adicionados em versões futuras com chaves e formato a definir.
 
-## Backend
-- Referência do backend de telemetria: https://github.com/dori-monitori/backend
+## Projeto
+- Referência do projeto: https://github.com/doricosta/dori-monitori
   - Aceita `POST` em JSON para logs e traces nas URLs configuradas
   - Requer cabeçalho `x-api-key`
 

@@ -26,10 +26,11 @@ node_modules
 build
 tmp
 
-#.env
-#.env.local
-#.env.production.local
-#.env.development.local
+#.env.usable
+.env
+.env.local
+.env.production.local
+.env.development.local
 
 public/assets
 

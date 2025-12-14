@@ -1,0 +1,147 @@
+services:
+  # Databases and cache
+  postgres:
+    image: postgres:15
+    container_name: postgres-dorimonitori
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: app
+    ports:
+      - "6997:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-dorimonitori
+    restart: always
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_PASSWORD: "root"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+  redis-main:
+    image: redis:7-alpine
+    container_name: redis-dorimonitori
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6999:6379"
+    volumes:
+      - redis_data_main:/data
+
+  redis-api-keys:
+    image: redis:7-alpine
+    container_name: redis-dorimonitori-api-keys
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6998:6379"
+    volumes:
+      - redis_data_api:/data
+
+  # Backend API
+  backend:
+    build:
+      context: ./dori-monitori-backend
+      dockerfile: Dockerfile
+    image: dori-monitori-backend:prod
+    pull_policy: never
+    container_name: dori-monitori-backend
+    restart: always
+    depends_on:
+      - postgres
+      - clickhouse
+      - redis-main
+    environment:
+      NODE_ENV: production
+      PORT: 4318
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      APP_KEY: "change-me-in-production"
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: "123456"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_DATABASE: app
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "root"
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_REQUEST_TIMEOUT: 30000
+      CLICKHOUSE_COMPRESSION_REQUEST: "false"
+      CLICKHOUSE_COMPRESSION_RESPONSE: "true"
+      REDIS_HOST: redis-main
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+    ports:
+      - "4318:4318"
+
+  # BullMQ worker (separate process)
+  backend-worker:
+    image: dori-monitori-backend:prod
+    pull_policy: never
+    container_name: dori-monitori-backend-worker
+    restart: always
+    depends_on:
+      - backend
+      - redis-main
+      - clickhouse
+    environment:
+      NODE_ENV: production
+      PORT: 4318
+      HOST: 0.0.0.0
+      LOG_LEVEL: info
+      APP_KEY: "change-me-in-production"
+      ADMIN_EMAIL: admin@example.com
+      ADMIN_PASSWORD: "123456"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_DATABASE: app
+      CLICKHOUSE_HOST: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: "root"
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_REQUEST_TIMEOUT: 30000
+      CLICKHOUSE_COMPRESSION_REQUEST: "false"
+      CLICKHOUSE_COMPRESSION_RESPONSE: "true"
+      REDIS_HOST: redis-main
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+    command: ["/bin/sh","-lc","node app/workers/trace_worker.js"]
+
+  # Frontend (Nginx, Vite build)
+  frontend:
+    build:
+      context: ./dori-monitori-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api
+    image: dori-monitori-frontend:prod
+    pull_policy: never
+    container_name: dori-monitori-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8081:8081"
+
+volumes:
+  clickhouse_data:
+  redis_data_main:
+  redis_data_api:
+  postgres_data:

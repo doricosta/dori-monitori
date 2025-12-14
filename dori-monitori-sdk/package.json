@@ -1,0 +1,23 @@
+{
+  "name": "dori-monitori-sdk",
+  "version": "0.1.2",
+  "private": false,
+  "type": "commonjs",
+  "license": "MIT",
+  "keywords": [
+    "telemetry",
+    "observability",
+    "monitoring",
+    "metrics",
+    "tracing",
+    "logging",
+    "sdk",
+    "nodejs",
+    "express",
+    "instrumentation"
+  ],
+  "main": "client/nodejs-express/index.js",
+  "exports": {
+    "./client/nodejs-express": "./client/nodejs-express/index.js"
+  }
+}

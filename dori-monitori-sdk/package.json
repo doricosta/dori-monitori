@@ -1,6 +1,6 @@
 {
   "name": "dori-monitori-sdk",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": false,
   "type": "commonjs",
   "license": "MIT",

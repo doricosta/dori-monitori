@@ -72,9 +72,13 @@ function routeWrapper(handler, metadata = {}) {
       }
 
       if (handlerReturn !== undefined) {
-        traceData.handler_data = handlerReturn
+        traceData.metadata = {
+          ...metadata,
+          handler_data: handlerReturn
+        }
+      } else {
+        traceData.metadata = metadata
       }
-
       sendTrace(traceData)
     }
   }

@@ -2,7 +2,6 @@ const { getLogUrl, getApiKey } = require('./config')
 async function sendLog(logData) {
   setImmediate(async () => {
     try {
-      console.log('📊 Telemetry:', JSON.stringify(logData, null, 2))
       const url = getLogUrl()
       if (url) {
         const apiKey = getApiKey()
